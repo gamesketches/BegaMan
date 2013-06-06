@@ -82,6 +82,9 @@ class Player(pygame.sprite.Sprite):
         self.grounded = False
         return False
 
+    def draw(self, screen):
+        screen.blit(self.image, (350, self.rect.y))
+
 class Platform:
     """ Platforms for getting higher. Container for a Surface and rect"""
     def __init__(self, topLeft, width, height, color=(0,0,0)):
@@ -120,6 +123,7 @@ def main():
     ground = Platform((0, 370), 700, 30)
 
     player = Player()
+    player.rect = player.rect.move(350,0)
     allsprites = pygame.sprite.Group(player)
 
     going = True
@@ -140,7 +144,8 @@ def main():
             screen.blit(i.visualPlatform, location )
             
         allsprites.update()
-        allsprites.draw(screen)
+        player.draw(screen)
+        #allsprites.draw(screen)
         pygame.display.flip()
 
 if __name__ == '__main__':
