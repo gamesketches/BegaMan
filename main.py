@@ -38,6 +38,7 @@ def load_sound(name):
         print ('Cannot load sound: %s' % fullname)
         raise SystemExit(str(geterror()))
     return sound
+        
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -79,26 +80,19 @@ class Player(pygame.sprite.Sprite):
                 self.velocity[0] += 0.03
             else:
                 self.velocity[0] = 0
+                self.image = self.standingImage
 
         self.rect = self.rect.move((self.velocity[0],self.velocity[1]))
-        print self.velocity[0]
-        print self.rect
         if self.velocity[0] > 0:
             self.cameraOffset += math.floor(self.velocity[0])
         else:
             self.cameraOffset += math.ceil(self.velocity[0])
-        print self.cameraOffset
         
         self.animationSwitch = not self.animationSwitch
-        if self.animationSwitch:
+        if self.animationSwitch and self.velocity[0]:
             self.animationPosition += 1
-        if self.animationPosition >= len(self.walkingRight):
-            self.animationPosition = 0
-
-        if self.velocity[0] > -0.1 and self.velocity[0] < 0.1:
-            self.velocity[0] = 0
-            self.image = self.standingImage
-        else:
+            if self.animationPosition >= len(self.walkingRight):
+                self.animationPosition = 0
             self.image = self.walkingRight[self.animationPosition]
 
     def checkGrounded(self):
@@ -154,6 +148,18 @@ class Projectile:
     def update(self):
         self.hitBox.x += 5
 
+class FlyingObject(pygame.sprite.Sprite):
+    """ Projectiles that target the player"""
+    def __init__(self, topLeft):
+        pygame.sprite.Sprite.__init__(self)
+        self.visualHitBox = pygame.Surface((100,100))
+        self.visualHitBox.fill((250,0,0))
+        self.hitBox = pygame.Rect(topLeft,(100,100))
+        projectileListing.append(self)
+
+    def update(self):
+        self.hitBox.x -= 10
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
@@ -204,6 +210,8 @@ def main():
     player.rect = player.rect.move(screen.get_width() /2,0)
     enemy = Enemy((1000, 200))
     allsprites = pygame.sprite.Group(player, enemy)
+
+    FlyingObject((1000,200))
 
     going = True
     while going:
