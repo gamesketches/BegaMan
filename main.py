@@ -8,6 +8,7 @@ main_dir = os.path.split(os.path.abspath(sys.argv[0]))[0]
 data_dir = os.path.join(main_dir, 'data')
 
 platformListing = []
+projectileListing = []
 TERMINALVELOCITY = 2
 TERMINALHORIZONTALVELOCITY = 5
 
@@ -82,8 +83,9 @@ class Player(pygame.sprite.Sprite):
         self.grounded = False
         return False
 
-    def draw(self, screen):
-        screen.blit(self.image, (350, self.rect.y))
+    def draw(self):
+        screen = pygame.display.get_surface()
+        screen.blit(self.image, (screen.get_width() / 2, self.rect.y))
 
 class Platform:
     """ Platforms for getting higher. Container for a Surface and rect"""
@@ -94,11 +96,23 @@ class Platform:
         self.hitBox = pygame.Rect(topLeft,(width,height))
         platformListing.append(self)
 
+class Projectile:
+    """ Projectiles that fly through the air!"""
+    def __init__(self, topLeft):
+        self.visualHitBox = pygame.Surface((10,10))
+        self.visualHitBox.convert()
+        self.visualHitBox.fill((150,250,50))
+        self.hitBox = pygame.Rect(topLeft, (10,10))
+        projectileListing.append(self)
+
+    def update(self):
+        self.hitBox.x += 5
+
 def main():
     
     #Initialize Everything
     pygame.init()
-    screen = pygame.display.set_mode((700, 400))
+    screen = pygame.display.set_mode((700, 800))
     pygame.display.set_caption('BegaMan')
     pygame.mouse.set_visible(0)
 
@@ -121,8 +135,10 @@ def main():
     camera = pygame.rect.Rect(0,0,700,400)
 
     ground = Platform((0, 370), 700, 30)
+    platform1 = Platform((600, 200), 700, 30)
 
     player = Player()
+    projectile = Projectile((100,100))
     player.rect = player.rect.move(350,0)
     allsprites = pygame.sprite.Group(player)
 
@@ -141,11 +157,16 @@ def main():
             location = [i.hitBox.left, i.hitBox.top]
             #location[0] += 350 - player.rect.center[0]
             location = (location[0] - player.cameraOffset, location[1])
-            screen.blit(i.visualPlatform, location )
+            screen.blit(i.visualPlatform, location)
+
+        for i in projectileListing:
+            i.update()
+            location = [i.hitBox.left, i.hitBox.top]
+            location = (location[0] - player.cameraOffset, location[1])
+            screen.blit(i.visualHitBox, location)
             
         allsprites.update()
-        player.draw(screen)
-        #allsprites.draw(screen)
+        player.draw()
         pygame.display.flip()
 
 if __name__ == '__main__':
