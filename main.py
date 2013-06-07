@@ -1,4 +1,4 @@
-import pygame, sys, os
+import pygame, sys, os, math
 from pygame.locals import *
 
 if not pygame.font: print 'Warning, fonts disabled'
@@ -50,6 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.walkingRight[0]
         self.rect = pygame.Rect(0,0,26,36)
         self.animationPosition = 0
+        self.animationSwitch = False
         self.grounded = False
         self.velocity = [0,0]
         self.cameraOffset = 0
@@ -72,14 +73,25 @@ class Player(pygame.sprite.Sprite):
                     self.velocity[1] += 1
         else:
             self.checkGrounded()
-            if self.velocity[0] > 0:
+            if self.velocity[0] >= 1:
                 self.velocity[0] -= 0.03
-            else:
+            elif self.velocity <= -1:
                 self.velocity[0] += 0.03
+            else:
+                self.velocity[0] = 0
 
         self.rect = self.rect.move((self.velocity[0],self.velocity[1]))
-        self.cameraOffset += self.velocity[0]
-        self.animationPosition += 1
+        print self.velocity[0]
+        print self.rect
+        if self.velocity[0] > 0:
+            self.cameraOffset += math.floor(self.velocity[0])
+        else:
+            self.cameraOffset += math.ceil(self.velocity[0])
+        print self.cameraOffset
+        
+        self.animationSwitch = not self.animationSwitch
+        if self.animationSwitch:
+            self.animationPosition += 1
         if self.animationPosition >= len(self.walkingRight):
             self.animationPosition = 0
 
@@ -189,7 +201,7 @@ def main():
     platform1 = Platform((600, 200), 700, 30)
 
     player = Player()
-    player.rect = player.rect.move(350,0)
+    player.rect = player.rect.move(screen.get_width() /2,0)
     enemy = Enemy((1000, 200))
     allsprites = pygame.sprite.Group(player, enemy)
 
