@@ -43,8 +43,13 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         #master_image, master_rect = load_image('megamanSpriteSheet.png')
-
-        self.image, self.rect = load_image('spike.bmp')
+        self.walkingRight = []
+        self.standingImage = None
+        self.loadAnimations('megamanSpriteSheet.png')
+        #self.image, self.rect = load_image('spike.bmp')
+        self.image = self.walkingRight[0]
+        self.rect = pygame.Rect(0,0,26,36)
+        self.animationPosition = 0
         self.grounded = False
         self.velocity = [0,0]
         self.cameraOffset = 0
@@ -74,6 +79,11 @@ class Player(pygame.sprite.Sprite):
                 
         self.rect = self.rect.move((self.velocity[0],self.velocity[1]))
         self.cameraOffset += self.velocity[0]
+        self.animationPosition += 1
+        print len(self.walkingRight)
+        if self.animationPosition >= len(self.walkingRight):
+            self.animationPosition = 0
+        self.image = self.walkingRight[self.animationPosition]
 
     def checkGrounded(self):
         for i in platformListing:
@@ -89,6 +99,21 @@ class Player(pygame.sprite.Sprite):
 
     def shootProjectile(self):
         Projectile(self.rect.center)
+
+    def loadAnimations(self, filename):
+        master_image, master_rect = load_image(filename)
+        master_image.convert()
+        
+        self.walkingRight.append(master_image.subsurface((10,208),(26,36)))
+        self.walkingRight.append(master_image.subsurface((56, 208), (26, 36)))
+        self.walkingRight.append(master_image.subsurface((100,208),(44,36)))
+        self.walkingRight.append(master_image.subsurface((155,208),(34,36)))
+        self.walkingRight.append(master_image.subsurface((209,208),(26,36)))
+        self.walkingRight.append(master_image.subsurface((258,208),(28,36)))
+        self.walkingRight.append(master_image.subsurface((10,258),(25,36)))
+        self.walkingRight.append(master_image.subsurface((59,258),(27,36)))
+        self.walkingRight.append(master_image.subsurface((104,258),(36,36)))
+                                 
 
 class Platform:
     """ Platforms for getting higher. Container for a Surface and rect"""
