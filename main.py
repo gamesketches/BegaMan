@@ -44,11 +44,9 @@ def load_sound(name):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        #master_image, master_rect = load_image('megamanSpriteSheet.png')
         self.walkingRight = []
         self.standingImage = None
         self.loadAnimations('megamanSpriteSheet.png')
-        #self.image, self.rect = load_image('spike.bmp')
         self.image = self.walkingRight[0]
         self.rect = pygame.Rect(0,0,26,36)
         self.animationPosition = 0
@@ -67,8 +65,10 @@ class Player(pygame.sprite.Sprite):
 
         if pygame.key.get_pressed()[K_RIGHT] and self.velocity[0] < TERMINALHORIZONTALVELOCITY:
             self.velocity[0] += 1
-        elif pygame.key.get_pressed()[K_LEFT] and self.velocity[0] > -TERMINALHORIZONTALVELOCITY:
+            print "accelerating right", self.velocity[0]
+        elif pygame.key.get_pressed()[K_LEFT] and self.velocity[0] > (TERMINALHORIZONTALVELOCITY * -1):
             self.velocity[0] += -1
+            print "accelerating left", self.velocity[0]
         elif pygame.key.get_pressed()[K_UP] and self.grounded:
             self.velocity[1] += -20
             self.grounded = False
@@ -83,7 +83,7 @@ class Player(pygame.sprite.Sprite):
             self.checkGrounded()
             if self.velocity[0] >= 1:
                 self.velocity[0] -= 0.03
-            elif self.velocity <= -1:
+            elif self.velocity[0] <= -1:
                 self.velocity[0] += 0.03
             else:
                 self.velocity[0] = 0
@@ -184,6 +184,16 @@ class Enemy(pygame.sprite.Sprite):
             screen = pygame.display.get_surface()
             screen.blit(self.image, (self.rect.x - offset, self.rect.y))
 
+class Goal(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_image("goal.png")
+        self.rect.center = center
+
+    def draw(self, offset):
+        screen = pygame.display.get_surface()
+        screen.blit(self.image, (self.rect.x - offset, self.rect.y))
+        
 def main():
     
     #Initialize Everything
@@ -212,14 +222,19 @@ def main():
 
     ground = Platform((0, 370), 700, 30)
     platform1 = Platform((600, 200), 700, 30)
+    platform2 = Platform((1500, 300), 50, 30)
+    platform3 = Platform((1700, 180), 300, 30)
+    platform4 = Platform((2600, 300), 500, 30)
 
     player = Player()
     player.rect = player.rect.move(screen.get_width() /2 , 0)
     enemy = Enemy((1000, 200))
     allsprites = pygame.sprite.Group(player, enemy)
 
-    flyingObjectTimer = 120
-    flyingObjectStarts = [(2000, 100), (2000, 202), (2000, 300)]
+    goal = Goal((3100, 200))
+
+    flyingObjectTimer = 60
+    flyingObjectStarts = [(5000, 100), (5000, 202), (5000, 300)]
 
     going = True
     while going:
@@ -236,7 +251,6 @@ def main():
         screen.blit(background, (0,0))
         for i in platformListing:
             location = [i.hitBox.left, i.hitBox.top]
-            #location[0] += 350 - player.rect.center[0]
             location = (location[0] - player.cameraOffset, location[1])
             screen.blit(i.visualPlatform, location)
 
@@ -254,6 +268,7 @@ def main():
         allsprites.update()
         player.draw()
         enemy.draw(player.cameraOffset)
+        goal.draw(player.cameraOffset)
         pygame.display.flip()
 
 if __name__ == '__main__':
