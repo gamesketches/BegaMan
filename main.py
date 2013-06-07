@@ -87,6 +87,9 @@ class Player(pygame.sprite.Sprite):
         screen = pygame.display.get_surface()
         screen.blit(self.image, (screen.get_width() / 2, self.rect.y))
 
+    def shootProjectile(self):
+        Projectile(self.rect.center)
+
 class Platform:
     """ Platforms for getting higher. Container for a Surface and rect"""
     def __init__(self, topLeft, width, height, color=(0,0,0)):
@@ -108,11 +111,28 @@ class Projectile:
     def update(self):
         self.hitBox.x += 5
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_image("monkey.bmp")
+        self.rect.center = center
+        self.dead = False
+
+    def update(self):
+        for i in projectileListing:
+            if self.rect.collidepoint(i.hitBox.center):
+                self.dead = True
+
+    def draw(self, offset):
+        if not self.dead:
+            screen = pygame.display.get_surface()
+            screen.blit(self.image, (self.rect.x - offset, self.rect.y))
+
 def main():
     
     #Initialize Everything
     pygame.init()
-    screen = pygame.display.set_mode((700, 800))
+    screen = pygame.display.set_mode((1000, 400))
     pygame.display.set_caption('BegaMan')
     pygame.mouse.set_visible(0)
 
@@ -138,9 +158,9 @@ def main():
     platform1 = Platform((600, 200), 700, 30)
 
     player = Player()
-    projectile = Projectile((100,100))
     player.rect = player.rect.move(350,0)
-    allsprites = pygame.sprite.Group(player)
+    enemy = Enemy((1000, 200))
+    allsprites = pygame.sprite.Group(player, enemy)
 
     going = True
     while going:
@@ -151,6 +171,8 @@ def main():
                 pygame.quit()
             elif event.type == KEYDOWN and event.key == K_ESCAPE:
                 pygame.quit()
+            elif event.type == KEYDOWN and event.key == K_SPACE:
+                player.shootProjectile()
 
         screen.blit(background, (0,0))
         for i in platformListing:
@@ -167,6 +189,7 @@ def main():
             
         allsprites.update()
         player.draw()
+        enemy.draw(player.cameraOffset)
         pygame.display.flip()
 
 if __name__ == '__main__':
