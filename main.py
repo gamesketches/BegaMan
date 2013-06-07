@@ -1,5 +1,6 @@
 import pygame, sys, os, math
 from pygame.locals import *
+from random import randrange
 
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
@@ -57,6 +58,12 @@ class Player(pygame.sprite.Sprite):
         self.cameraOffset = 0
 
     def update(self):
+
+        for i in projectileListing:
+            if type(i) is FlyingObject:
+                if self.rect.colliderect(i.hitBox):
+                    pygame.quit()
+                    
 
         if pygame.key.get_pressed()[K_RIGHT] and self.velocity[0] < TERMINALHORIZONTALVELOCITY:
             self.velocity[0] += 1
@@ -207,11 +214,12 @@ def main():
     platform1 = Platform((600, 200), 700, 30)
 
     player = Player()
-    player.rect = player.rect.move(screen.get_width() /2,0)
+    player.rect = player.rect.move(screen.get_width() /2 , 0)
     enemy = Enemy((1000, 200))
     allsprites = pygame.sprite.Group(player, enemy)
 
-    FlyingObject((1000,200))
+    flyingObjectTimer = 120
+    flyingObjectStarts = [(2000, 100), (2000, 202), (2000, 300)]
 
     going = True
     while going:
@@ -237,7 +245,12 @@ def main():
             location = [i.hitBox.left, i.hitBox.top]
             location = (location[0] - player.cameraOffset, location[1])
             screen.blit(i.visualHitBox, location)
-            
+
+        flyingObjectTimer -= 1
+        if flyingObjectTimer <= 0:
+            flyingObjectTimer = 120
+            FlyingObject(flyingObjectStarts[randrange(0,len(flyingObjectStarts) - 1)])
+                
         allsprites.update()
         player.draw()
         enemy.draw(player.cameraOffset)
