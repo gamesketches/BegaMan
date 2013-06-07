@@ -87,17 +87,20 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.standingImage
 
         self.rect = self.rect.move((self.velocity[0],self.velocity[1]))
-        if self.velocity[0] > 0:
-            self.cameraOffset += math.floor(self.velocity[0])
-        else:
-            self.cameraOffset += math.ceil(self.velocity[0])
-        
+
         self.animationSwitch = not self.animationSwitch
         if self.animationSwitch and self.velocity[0]:
             self.animationPosition += 1
             if self.animationPosition >= len(self.walkingRight):
                 self.animationPosition = 0
+            #self.image = self.walkingRight[self.animationPosition]
+            
+        if self.velocity[0] > 0:
+            self.cameraOffset += math.floor(self.velocity[0])
             self.image = self.walkingRight[self.animationPosition]
+        else:
+            self.cameraOffset += math.ceil(self.velocity[0])
+            self.image = pygame.transform.flip(self.walkingRight[self.animationPosition], True, False)
 
     def checkGrounded(self):
         for i in platformListing:
