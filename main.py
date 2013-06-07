@@ -62,13 +62,10 @@ class Player(pygame.sprite.Sprite):
                 if self.rect.colliderect(i.hitBox):
                     pygame.quit()
                     
-
         if pygame.key.get_pressed()[K_RIGHT] and self.velocity[0] < TERMINALHORIZONTALVELOCITY:
             self.velocity[0] += 1
-            print "accelerating right", self.velocity[0]
         elif pygame.key.get_pressed()[K_LEFT] and self.velocity[0] > (TERMINALHORIZONTALVELOCITY * -1):
             self.velocity[0] += -1
-            print "accelerating left", self.velocity[0]
         elif pygame.key.get_pressed()[K_UP] and self.grounded:
             self.velocity[1] += -20
             self.grounded = False
@@ -193,6 +190,10 @@ class Goal(pygame.sprite.Sprite):
     def draw(self, offset):
         screen = pygame.display.get_surface()
         screen.blit(self.image, (self.rect.x - offset, self.rect.y))
+
+    def update(self, playerRect):
+        if self.rect.colliderect(playerRect):
+            pygame.quit()
         
 def main():
     
@@ -268,6 +269,7 @@ def main():
         allsprites.update()
         player.draw()
         enemy.draw(player.cameraOffset)
+        goal.update(player.rect)
         goal.draw(player.cameraOffset)
         pygame.display.flip()
 
